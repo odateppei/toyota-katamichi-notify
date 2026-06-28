@@ -33,7 +33,7 @@ CONDITIONS = [
 
 def load_seen() -> set:
     if os.path.exists(SEEN_FILE):
-        with open(SEEN_FILE, encoding="utf-8") as f:
+        with open(SEEN_FILE, encoding="utf-8-sig") as f:
             return set(json.load(f))
     return set()
 
