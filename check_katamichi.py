@@ -14,6 +14,15 @@ LINE_TOKEN   = os.environ["LINE_CHANNEL_ACCESS_TOKEN"]
 LINE_USER_ID = os.environ["LINE_USER_ID"]
 
 CONDITIONS = [
+    # ---- 動作確認用テスト条件（確認後に削除してください） ----
+    {
+        "id":    "test_0701",
+        "label": "[テスト] 7/1 東北エリア → 青森",
+        "target_date":        (7, 1),
+        "departure_keywords": ["岩手", "宮城", "山形"],
+        "return_keywords":    ["青森"],
+    },
+    # ---- 本番条件 ----
     {
         "id":    "cond_0703",
         "label": "7/3 20時 京都or大阪 → 中目黒山手通り",
