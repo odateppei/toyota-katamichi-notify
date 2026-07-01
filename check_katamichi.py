@@ -81,18 +81,26 @@ def listing_id(listing: dict) -> str:
     return hashlib.md5(listing["raw"][:300].encode()).hexdigest()
 
 
-def send_line(message: str):
-    r = requests.post(
-        "https://api.line.me/v2/bot/message/push",
-        headers={
-            "Authorization": f"Bearer {LINE_TOKEN}",
-            "Content-Type": "application/json",
-        },
-        json={"to": LINE_USER_ID, "messages": [{"type": "text", "text": message}]},
-        timeout=15,
-    )
-    r.raise_for_status()
-    print("  LINE送信OK")
+def send_line(message: str) -> bool:
+    try:
+        r = requests.post(
+            "https://api.line.me/v2/bot/message/push",
+            headers={
+                "Authorization": f"Bearer {LINE_TOKEN}",
+                "Content-Type": "application/json",
+            },
+            json={"to": LINE_USER_ID, "messages": [{"type": "text", "text": message}]},
+            timeout=15,
+        )
+        if r.status_code == 200:
+            print("  LINE送信OK")
+            return True
+        else:
+            print(f"  LINE送信エラー: {r.status_code} / {r.text}")
+            return False
+    except Exception as e:
+        print(f"  LINE送信例外: {e}")
+        return False
 
 
 def main():
