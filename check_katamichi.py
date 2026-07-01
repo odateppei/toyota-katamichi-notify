@@ -118,12 +118,11 @@ def main():
 
     # 通常モード: 未通知の新着だけ通知
     notified = 0
+    failed = 0
     already_seen = 0
     for listing in listings:
         lid = listing_id(listing)
         if lid not in seen:
-            seen.add(lid)
-            notified += 1
             msg = (
                 f"【片道GO 新着！】\n\n"
                 f"出発: {listing['departure']}\n"
@@ -133,13 +132,17 @@ def main():
                 f"予約TEL: {listing['phone']}\n\n"
                 f"-> 今すぐ電話予約:\n{SITE_URL}"
             )
-            send_line(msg)
-            print(f"  通知: {listing['departure'][:40]}")
+            if send_line(msg):
+                seen.add(lid)   # LINE送信成功後だけ既読にする
+                notified += 1
+                print(f"  通知: {listing['departure'][:40]}")
+            else:
+                failed += 1     # 失敗は次回リトライ（seen.jsonに追加しない）
         else:
             already_seen += 1
 
     save_seen(seen)
-    print(f"完了 / 既読スキップ: {already_seen}件 / 新着通知: {notified}件")
+    print(f"完了 / 既読スキップ: {already_seen}件 / 新着通知: {notified}件 / 送信失敗: {failed}件")
 
 
 if __name__ == "__main__":
