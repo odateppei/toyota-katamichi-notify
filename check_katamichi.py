@@ -110,6 +110,7 @@ def main():
 
     # 通常モード: 未通知の新着だけ通知
     notified = 0
+    already_seen = 0
     for listing in listings:
         lid = listing_id(listing)
         if lid not in seen:
@@ -126,9 +127,11 @@ def main():
             )
             send_line(msg)
             print(f"  通知: {listing['departure'][:40]}")
+        else:
+            already_seen += 1
 
     save_seen(seen)
-    print(f"完了 (新着通知: {notified}件)")
+    print(f"完了 / 既読スキップ: {already_seen}件 / 新着通知: {notified}件")
 
 
 if __name__ == "__main__":
