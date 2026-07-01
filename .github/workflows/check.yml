@@ -4,6 +4,13 @@ on:
   schedule:
     - cron: '*/5 * * * *'
   workflow_dispatch:
+    inputs:
+      seed:
+        description: '既存リストを既読にしてリセット（通知なし）'
+        required: false
+        default: 'false'
+        type: choice
+        options: ['false', 'true']
 
 permissions:
   contents: write
@@ -32,6 +39,7 @@ jobs:
         env:
           LINE_CHANNEL_ACCESS_TOKEN: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
           LINE_USER_ID: ${{ secrets.LINE_USER_ID }}
+          SEED: ${{ github.event.inputs.seed || 'false' }}
         run: python check_katamichi.py
 
       - name: seen.json を更新コミット
