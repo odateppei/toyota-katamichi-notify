@@ -77,6 +77,16 @@ def fetch_listings() -> list:
     return listings
 
 
+KINKI_KANTO_PREFS = {
+    "大阪", "京都", "兵庫", "奈良", "滋賀", "和歌山",
+    "東京", "神奈川", "埼玉", "千葉", "茨城", "栃木", "群馬",
+}
+
+
+def is_target_region(listing: dict) -> bool:
+    return any(pref in listing["departure"] for pref in KINKI_KANTO_PREFS)
+
+
 def listing_id(listing: dict) -> str:
     return hashlib.md5(listing["raw"][:300].encode()).hexdigest()
 
@@ -125,7 +135,11 @@ def main():
     failed = 0
     quota_skip = 0
     already_seen = 0
+    skipped_region = 0
     for listing in listings:
+        if not is_target_region(listing):
+            skipped_region += 1
+            continue
         lid = listing_id(listing)
         if lid not in seen:
             msg = (
@@ -151,7 +165,7 @@ def main():
             already_seen += 1
 
     save_seen(seen)
-    print(f"完了 / 既読スキップ: {already_seen}件 / 新着通知: {notified}件 / 月次上限スキップ: {quota_skip}件 / 送信失敗: {failed}件")
+    print(f"完了 / 対象外地域スキップ: {skipped_region}件 / 既読スキップ: {already_seen}件 / 新着通知: {notified}件 / 月次上限スキップ: {quota_skip}件 / 送信失敗: {failed}件")
 
 
 if __name__ == "__main__":
