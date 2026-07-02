@@ -81,7 +81,8 @@ def listing_id(listing: dict) -> str:
     return hashlib.md5(listing["raw"][:300].encode()).hexdigest()
 
 
-def send_line(message: str) -> bool:
+def send_line(message: str) -> str:
+    """'ok' | 'quota' | 'error' を返す"""
     try:
         r = requests.post(
             "https://api.line.me/v2/bot/message/push",
@@ -94,13 +95,16 @@ def send_line(message: str) -> bool:
         )
         if r.status_code == 200:
             print("  LINE送信OK")
-            return True
+            return "ok"
+        elif r.status_code == 429:
+            print("  LINE送信エラー: 月次上限到達 → 既読にスキップ")
+            return "quota"
         else:
             print(f"  LINE送信エラー: {r.status_code} / {r.text}")
-            return False
+            return "error"
     except Exception as e:
         print(f"  LINE送信例外: {e}")
-        return False
+        return "error"
 
 
 def main():
@@ -119,6 +123,7 @@ def main():
     # 通常モード: 未通知の新着だけ通知
     notified = 0
     failed = 0
+    quota_skip = 0
     already_seen = 0
     for listing in listings:
         lid = listing_id(listing)
@@ -132,17 +137,21 @@ def main():
                 f"予約TEL: {listing['phone']}\n\n"
                 f"-> 今すぐ電話予約:\n{SITE_URL}"
             )
-            if send_line(msg):
-                seen.add(lid)   # LINE送信成功後だけ既読にする
+            result = send_line(msg)
+            if result == "ok":
+                seen.add(lid)
                 notified += 1
                 print(f"  通知: {listing['departure'][:40]}")
+            elif result == "quota":
+                seen.add(lid)   # 月次上限 → 既読にして無限ループを防ぐ
+                quota_skip += 1
             else:
-                failed += 1     # 失敗は次回リトライ（seen.jsonに追加しない）
+                failed += 1     # 一時的エラー → 次回リトライ
         else:
             already_seen += 1
 
     save_seen(seen)
-    print(f"完了 / 既読スキップ: {already_seen}件 / 新着通知: {notified}件 / 送信失敗: {failed}件")
+    print(f"完了 / 既読スキップ: {already_seen}件 / 新着通知: {notified}件 / 月次上限スキップ: {quota_skip}件 / 送信失敗: {failed}件")
 
 
 if __name__ == "__main__":
