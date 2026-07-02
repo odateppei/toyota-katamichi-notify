@@ -12,34 +12,19 @@ jobs:
           LINE_CHANNEL_ACCESS_TOKEN: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
           LINE_USER_ID: ${{ secrets.LINE_USER_ID }}
         run: |
-          python3 - <<'EOF'
+          python3 -c "
 import requests, os
-
-token   = os.environ["LINE_CHANNEL_ACCESS_TOKEN"]
-user_id = os.environ["LINE_USER_ID"]
-
-print(f"token 長さ: {len(token)} 文字")
-print(f"user_id 先頭: {user_id[:5]}...")
-
+token   = os.environ['LINE_CHANNEL_ACCESS_TOKEN']
+user_id = os.environ['LINE_USER_ID']
+print(f'token 長さ: {len(token)} 文字')
+print(f'user_id 先頭: {user_id[:5]}...')
 r = requests.post(
-    "https://api.line.me/v2/bot/message/push",
-    headers={
-        "Authorization": f"Bearer {token}",
-        "Content-Type": "application/json",
-    },
-    json={
-        "to": user_id,
-        "messages": [{"type": "text", "text": "【テスト】LINE送信確認"}],
-    },
+    'https://api.line.me/v2/bot/message/push',
+    headers={'Authorization': f'Bearer {token}', 'Content-Type': 'application/json'},
+    json={'to': user_id, 'messages': [{'type': 'text', 'text': '【テスト】LINE送信確認'}]},
     timeout=15,
 )
-
-print(f"HTTPステータス: {r.status_code}")
-print(f"レスポンス: {r.text}")
-
-if r.status_code == 200:
-    print("SUCCESS: LINE送信成功！")
-else:
-    print("ERROR: LINE送信失敗")
-    exit(1)
-EOF
+print(f'HTTPステータス: {r.status_code}')
+print(f'レスポンス: {r.text}')
+exit(0 if r.status_code == 200 else 1)
+"
