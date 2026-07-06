@@ -77,10 +77,7 @@ def fetch_listings() -> list:
     return listings
 
 
-KINKI_KANTO_PREFS = {
-    "大阪", "京都", "兵庫", "奈良", "滋賀", "和歌山",
-    "東京", "神奈川", "埼玉", "千葉", "茨城", "栃木", "群馬",
-}
+KINKI_KANTO_PREFS = {"大阪", "京都", "東京"}
 
 
 def is_target_region(listing: dict) -> bool:
