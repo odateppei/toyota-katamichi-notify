@@ -77,11 +77,14 @@ def fetch_listings() -> list:
     return listings
 
 
-KINKI_KANTO_PREFS = {"大阪", "京都", "東京"}
+DEPARTURE_PREFS = {"大阪", "京都"}
+ARRIVAL_PREFS   = {"東京", "愛知"}
 
 
 def is_target_region(listing: dict) -> bool:
-    return any(pref in listing["departure"] for pref in KINKI_KANTO_PREFS)
+    dep_ok = any(pref in listing["departure"] for pref in DEPARTURE_PREFS)
+    ret_ok = any(pref in listing["return"] for pref in ARRIVAL_PREFS)
+    return dep_ok and ret_ok
 
 
 def listing_id(listing: dict) -> str:
